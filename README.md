@@ -2,7 +2,7 @@
 
 ```
 $ git clone git@github.com:inspired-solutions/django-graphql-starter.git
-$ cd django-graphql-starter.git
+$ cd django-graphql-starter
 
 $ virtualenv venv -p /usr/bin/python3 (linux)
 $ . venv/bin/activate (linux)
