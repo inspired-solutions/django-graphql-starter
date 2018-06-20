@@ -14,12 +14,12 @@ git clone git@github.com:inspired-solutions/django-graphql-starter.git
 #2. Navigate to new project
 cd django-graphql-starter
 
-#3 Install and activate virtual enviroment
+#3 Install and activate virtual environment
   Linux:
-    virtualenv venv -p /usr/bin/python3 (linux)
+    virtualenv venv -p /usr/bin/python3 
     . venv/bin/activate (linux)
   Windows:
-    virtualenv venv -p /c/Python35/python3.exe (windows)
+    virtualenv venv -p /c/Python35/python3.exe 
     . venv/Scripts/activate (windows)
 
 #4 Install requirements
