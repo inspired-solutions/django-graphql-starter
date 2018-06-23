@@ -1,0 +1,14 @@
+# Python compiled byte code
+*.pyc
+
+# Staticfiles
+/static/
+
+# Virtualenv
+venv/
+
+# editors
+.idea
+**/.tern-port
+
+local_settings.py
