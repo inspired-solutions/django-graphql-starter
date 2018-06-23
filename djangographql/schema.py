@@ -1,24 +1,24 @@
 import graphene
 
-from core.schema import Query as ApiQuery, Mutation as ApiMutation
+from core.schema import Query as CoreQuery, Mutation as CoreMutation
 
 
 class Query(
-            ApiQuery,
-            graphene.ObjectType):
+        CoreQuery,
+        graphene.ObjectType):
     """
     Query
     """
     pass
 
 
-class Mutation(
-            ApiMutation,
-            graphene.ObjectType):
+'''class Mutation(
+        CoreMutation,
+        graphene.ObjectType):
     """
     Mutation
     """
-    pass
+    pass'''
 
 
-schema = graphene.Schema(query=Query, mutation=Mutation)
+schema = graphene.Schema(query=Query)  # , mutation=Mutation)
