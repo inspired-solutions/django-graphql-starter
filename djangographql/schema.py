@@ -12,13 +12,13 @@ class Query(
     pass
 
 
-'''class Mutation(
+class Mutation(
         CoreMutation,
         graphene.ObjectType):
     """
     Mutation
     """
-    pass'''
+    pass
 
 
-schema = graphene.Schema(query=Query)  # , mutation=Mutation)
+schema = graphene.Schema(query=Query, mutation=Mutation)
