@@ -2,7 +2,7 @@
 
 <br />
 
-![](https://cdn-images-1.medium.com/max/1600/1*iZP4uQB_-bdJyc-KYtdFYw.png)
+![](https://cdn-images-1.medium.com/max/1600/1*jLrvxW83rre-25Nrhk-tww.png)
 
 
 
@@ -24,4 +24,20 @@ cd django-graphql-starter
 
 #4 Install requirements
   pip3 install -r requirements.txt
+```
+
+
+## Deployment
+```
+#1. Clone repository in server
+- sudo mkdir amae_api
+- sudo chown user:user amae_api -R
+- cd  amae_api
+- git clone project
+
+#2. Create .conf file and modify
+- ./makesite.sh <project-name>
+- cat /etc/apache2/sites-available/amae-api.inspiredsolutions.pe.conf
+- sudo a2ensite amae-api.inspiredsolutions.pe.conf
+- sudo apachectl restart
 ```
