@@ -5,7 +5,7 @@ from django.contrib.auth import models as auth_models
 
 
 class UserWhereUniqueInput(graphene.InputObjectType):
-    id = graphene.Int()
+    id = graphene.ID()
 
 
 class UserWhereInput(UserWhereUniqueInput):
@@ -20,7 +20,7 @@ class User(DjangoObjectType):
 
 
 class GroupWhereUniqueInput(graphene.InputObjectType):
-    id = graphene.Int()
+    id = graphene.ID()
 
 
 class GroupWhereInput(UserWhereUniqueInput):
@@ -84,11 +84,10 @@ class Query(graphene.ObjectType):
 class PermissionCreateInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     codename = graphene.String(required=True)
-    # content_type = graphene.String(required=True)
 
 
 class PermissionWhereUniqueInput(graphene.InputObjectType):
-    id = graphene.Int()
+    id = graphene.ID()
 
 
 class PermissionWhereInput(PermissionWhereUniqueInput):
@@ -103,9 +102,6 @@ class PermissionManyInput(graphene.InputObjectType):
     def mutate(self, info, data):
         pass
 
-# class UserWhere
-# class UserManyInput():
-
 
 class GroupCreateInput(graphene.InputObjectType):
     name = graphene.String(required=True)
@@ -115,14 +111,16 @@ class GroupCreateInput(graphene.InputObjectType):
 
 class GroupUpdateInput(GroupCreateInput):
     name = graphene.String()
-    # permissions = graphene.List(graphene.NonNull(PermissionManyInput))
+    permissions = graphene.List(graphene.NonNull(PermissionManyInput))
 
 
-class CreateGroup(graphene.Mutation):
+class OutputGroup(graphene.ObjectType):
+    Output = Group
+
+
+class CreateGroup(OutputGroup, graphene.Mutation):
     class Arguments:
         data = GroupCreateInput(required=True)
-
-    Output = Group
 
     def mutate(self, info, data):
         group = auth_models.Group()
@@ -145,9 +143,51 @@ class CreateGroup(graphene.Mutation):
 
         return group
 
-        # [data!] -> graphene.List(graphene.NonNull(UserWhereUniqueInput))
-        # [data!]! -> graphene.NonNull(graphene.List(graphene.NonNull(UserWhereUniqueInput)))
+
+class UpdateGroup(OutputGroup, graphene.Mutation):
+    class Arguments:
+        data = GroupUpdateInput(required=True) 
+        where = GroupWhereUniqueInput(required=True)
+
+    def mutate(self, info, data, where):
+        try:
+            group = auth_models.Group.objects.get(id=where.id)
+
+            if where.get('name'):
+                group.name = where.get('name')
+
+            group.save()
+
+            if where.get('permissions'):
+                permissions = where.get('permissions')
+
+                if permissions.get('connect'):
+                    connect = permissions.get('connect')
+
+                    for permission in connect:
+                        try:
+                            model_permission = auth_models.Permission.objects.get(id=permission.id)
+                            model_permission.group_set.add(group)
+                        except auth_models.Permission.DoesNotExists:
+                            raise Exception('Permission not found.')
+
+            return group
+        except auth_models.Group.DoesNotExists:
+            raise Exception('Group not found.')
+
+
+class DeleteGroup(OutputGroup, graphene.Mutation):
+    class Arguments:
+        where = GroupWhereUniqueInput(required=True)
+
+    def mutate(self, info, where):
+        group = auth_models.Group.objects.get(id=where.id)
+        group.delete()
+
+        return group
 
 
 class Mutation(graphene.ObjectType):
     create_group = CreateGroup.Field()
+    update_group = UpdateGroup.Field()
+    delete_group = DeleteGroup.Field()
