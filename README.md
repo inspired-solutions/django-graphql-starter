@@ -15,6 +15,8 @@ $ ./manage.py migrate
 
 ## Deployment
 ```
+$ cp djangographql/local_settings.prod.py djangographql/local_settings.py
+$ nano djangographql/local_settings.py (update)
 $ ./manage.py migrate
 $ ./manage.py collectstatic
 ```
