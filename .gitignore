@@ -1,5 +1,3 @@
-.vscode
-
 # Python compiled byte code
 *.pyc
 
@@ -12,5 +10,8 @@ venv/
 # editors
 .idea
 **/.tern-port
+.vscode
 
 local_settings.py
+
+db.sqlite3
