@@ -2,6 +2,7 @@ import graphene
 from graphene_django.types import DjangoObjectType
 
 from django.contrib.auth import models as auth_models
+from django.db.transaction import atomic
 
 
 class UserWhereUniqueInput(graphene.InputObjectType):
@@ -99,9 +100,6 @@ class PermissionManyInput(graphene.InputObjectType):
     create = graphene.List(graphene.NonNull(PermissionCreateInput))
     connect = graphene.List(graphene.NonNull(PermissionWhereUniqueInput))
 
-    def mutate(self, info, data):
-        pass
-
 
 class GroupCreateInput(graphene.InputObjectType):
     name = graphene.String(required=True)
@@ -118,28 +116,41 @@ class OutputGroup(graphene.ObjectType):
     Output = Group
 
 
+def group_transform_permissions(group, data):
+    permissions = data.get('permissions')
+
+    if permissions:
+        create = permissions.get('create')
+        connect = permissions.get('connect')
+
+        if create:
+            for permission in create:
+                model_permission = auth_models.Permission()
+                model_permission.name = permission.name
+                model_permission.codename = permission.codename
+                model_permission.content_type_id = 1
+                model_permission.save()
+                model_permission.group_set.add(group)
+
+        if connect:
+            for permission in connect:
+                model_permission = model_filter(auth_models.Permission.objects.all(), permission).first()
+                assert model_permission is not None, 'Permission not found.'
+
+                model_permission.group_set.add(group)
+
+
 class CreateGroup(OutputGroup, graphene.Mutation):
     class Arguments:
         data = GroupCreateInput(required=True)
 
+    @atomic
     def mutate(self, info, data):
         group = auth_models.Group()
         group.name = data.name
         group.save()
 
-        permissions = data.get('permissions')
-
-        if permissions:
-            create = permissions.get('create')
-
-            if create:
-                for permission in create:
-                    model_permission = auth_models.Permission()
-                    model_permission.name = permission.name
-                    model_permission.codename = permission.codename
-                    model_permission.content_type_id = 1
-                    model_permission.save()
-                    model_permission.group_set.add(group)
+        group_transform_permissions(group, data)
 
         return group
 
@@ -149,31 +160,18 @@ class UpdateGroup(OutputGroup, graphene.Mutation):
         data = GroupUpdateInput(required=True) 
         where = GroupWhereUniqueInput(required=True)
 
+    @atomic
     def mutate(self, info, data, where):
-        try:
-            group = auth_models.Group.objects.get(id=where.id)
+        group = model_filter(auth_models.Group.objects.all(), where).first()
+        assert group is not None, 'Group not found.'
 
-            if where.get('name'):
-                group.name = where.get('name')
+        if data.get('name'):
+            group.name = data.get('name')
 
-            group.save()
+        group.save()
+        group_transform_permissions(group, data)
 
-            if where.get('permissions'):
-                permissions = where.get('permissions')
-
-                if permissions.get('connect'):
-                    connect = permissions.get('connect')
-
-                    for permission in connect:
-                        try:
-                            model_permission = auth_models.Permission.objects.get(id=permission.id)
-                            model_permission.group_set.add(group)
-                        except auth_models.Permission.DoesNotExists:
-                            raise Exception('Permission not found.')
-
-            return group
-        except auth_models.Group.DoesNotExists:
-            raise Exception('Group not found.')
+        return group
 
 
 class DeleteGroup(OutputGroup, graphene.Mutation):
@@ -181,7 +179,9 @@ class DeleteGroup(OutputGroup, graphene.Mutation):
         where = GroupWhereUniqueInput(required=True)
 
     def mutate(self, info, where):
-        group = auth_models.Group.objects.get(id=where.id)
+        group = model_filter(auth_models.Group.objects.all(), where).first()
+        assert group is not None, 'Group not found.'
+
         group.delete()
 
         return group
