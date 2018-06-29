@@ -30,9 +30,10 @@ class Query(graphene.ObjectType):
         return model_filter(auth_models.Group.objects.all(), where)
 
     def resolve_group(self, info, where):
-        group = model_filter(auth_models.Group.objects.all(), where).first()
-        assert group is not None, 'Group not found.'
-        return group
+        groups = model_filter(auth_models.Group.objects.all(), where)
+        assert len(groups) < 2, 'Many Groups found.'
+        assert len(groups) > 0, 'Group not found'
+        return groups.first()
 
 
 class GroupCreateInput(graphene.InputObjectType):
@@ -40,7 +41,7 @@ class GroupCreateInput(graphene.InputObjectType):
     permissions = PermissionManyInput()
 
 
-class GroupUpdateInput(GroupCreateInput):
+class GroupUpdateInput(graphene.InputObjectType):
     name = graphene.String()
     permissions = PermissionManyInput()
 
@@ -74,7 +75,7 @@ class UpdateGroup(OutputGroup, graphene.Mutation):
         group = Query().resolve_group(info, where)
 
         if data.get('name'):
-            group.name = data.get('name')
+            group.name = data.name
 
         group.save()
 

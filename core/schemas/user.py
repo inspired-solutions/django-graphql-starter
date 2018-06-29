@@ -28,6 +28,7 @@ class Query(graphene.ObjectType):
         return model_filter(auth_models.User.objects.all(), where)
 
     def resolve_user(self, info, where):
-        user = model_filter(auth_models.User.objects.all(), where).first()
-        assert user is not None, "User not found"
-        return user
+        users = model_filter(auth_models.User.objects.all(), where)
+        assert len(users) < 2, 'Many Users found'
+        assert len(users) > 0, 'User not found'
+        return users.first()

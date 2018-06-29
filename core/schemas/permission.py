@@ -29,9 +29,10 @@ class Query(graphene.ObjectType):
         return model_filter(auth_models.Permission.objects.all(), where)
 
     def resolve_permission(self, info, where):
-        permission = model_filter(auth_models.Permission.objects.all(), where).first()
-        assert permission is not None, 'Permission not found.'
-        return permission
+        permissions = model_filter(auth_models.Permission.objects.all(), where)
+        assert len(permissions) < 2, 'Many Permissions found.'
+        assert len(permissions) > 0, 'Permission not found'
+        return permissions.first()
 
 
 class PermissionCreateInput(graphene.InputObjectType):
@@ -76,10 +77,10 @@ class UpdatePermission(OutputPermission, graphene.Mutation):
         permission = Query.resolve_permission(info, where)
 
         if data.get('name'):
-            permission.name = data.get('name')
+            permission.name = data.name
 
         if data.get('codename'):
-            permission.codename = data.get('codename')
+            permission.codename = data.codename
 
         permission.save()
 
