@@ -1,27 +1,22 @@
 <h1 align="center"><strong>Django with GraphQL Server</strong></h1>
 
-<br />
-
-![](https://cdn-images-1.medium.com/max/1600/1*iZP4uQB_-bdJyc-KYtdFYw.png)
-
-
+![](https://cdn-images-1.medium.com/max/1600/1*jLrvxW83rre-25Nrhk-tww.png)
 
 ## Getting started
 ```
-#1. Clone the project
-git clone git@github.com:inspired-solutions/django-graphql-starter.git
+$ git clone git@github.com:inspired-solutions/django-graphql-starter.git
+$ cd django-graphql-starter
+$ virtualenv venv -p /path/to/python3
+$ . venv/bin/activate (linux)
+$ . venv/Scripts/activate (windows)
+$ pip3 install -r requirements.txt
+$ ./manage.py migrate
+```
 
-#2. Navigate to new project
-cd django-graphql-starter
-
-#3 Install and activate virtual environment
-  Linux:
-    virtualenv venv -p /usr/bin/python3 
-    . venv/bin/activate (linux)
-  Windows:
-    virtualenv venv -p /c/Python35/python3.exe 
-    . venv/Scripts/activate (windows)
-
-#4 Install requirements
-  pip3 install -r requirements.txt
+## Deployment
+```
+$ cp djangographql/local_settings.prod.py djangographql/local_settings.py
+$ nano djangographql/local_settings.py (update)
+$ ./manage.py migrate
+$ ./manage.py collectstatic
 ```
