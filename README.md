@@ -28,14 +28,14 @@ $ ./manage.py migrate
 
 ### Commands
 
-* `pip install .r requirements` Install all modules described in requirements.txt
-* `./manage.py migrate` Apply migrations to database
+* `pip install -r requirements` Install all modules described in requirements.txt
+* `python manage.py migrate` Apply migrations to database
  
 
 ## Deployment
 ```
 $ cp djangographql/local_settings.prod.py djangographql/local_settings.py
-$ nano djangographql/local_settings.py (update)
+$ nano djangographql/local_settings.py  # update settings
 $ ./manage.py migrate
 $ ./manage.py collectstatic
 ```
