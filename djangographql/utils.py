@@ -13,3 +13,8 @@ def model_filter(queryset, where):
         result = result.union(model_filter(queryset, where.get('OR')))
 
     return result
+
+
+def token_exempt(func):
+    func.token_exempt = True
+    return func

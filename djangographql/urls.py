@@ -18,12 +18,12 @@ from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 from graphene_django.views import GraphQLView
 
-# from .middleware import TokenAuthenticationMiddleware
+from .middleware import TokenAuthenticationMiddleware
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True, middleware=[TokenAuthenticationMiddleware]))),
-    # path('graphql/', GraphQLView.as_view(graphiql=True)),
-    path('graphql', csrf_exempt(GraphQLView.as_view())),
+    path('graphiql/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
+    path('graphql/', csrf_exempt(GraphQLView.as_view(middleware=[TokenAuthenticationMiddleware]))),
+    path('api/', csrf_exempt(GraphQLView.as_view(middleware=[TokenAuthenticationMiddleware]))),
 ]
