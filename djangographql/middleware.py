@@ -1,14 +1,25 @@
 from rest_framework.authentication import TokenAuthentication
 
 
-class TokenAuthenticationMiddleware:
+class TokenAuthenticationMiddleware(object):
     def resolve(self, next, root, info, **args):
+
         if root is None:
-            result = TokenAuthentication().authenticate(info.context)
+            token_exempt = getattr(next.args[0], 'token_exempt', False)
+            is_introspection = getattr(info.operation.name, 'value', False) == 'IntrospectionQuery'
 
-            assert result is not None, 'Authentication credentials were not provided.'
+            if not token_exempt and not is_introspection:
+                result = TokenAuthentication().authenticate(info.context)
 
-            user, token = result
+                assert result is not None, 'Authentication credentials were not provided.'
 
-            info.context.user = user
+                user, token = result
+
+                info.context.user = user
+
+        return next(root, info, **args)
+
+
+class ACLMiddleware(object):
+    def resolve(self, next, root, info, **args):
         return next(root, info, **args)
