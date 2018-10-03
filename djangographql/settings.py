@@ -25,7 +25,7 @@ SECRET_KEY = 'q+d%=2f1okoy)x667t*w)b04^*=$05xwh-x%s*cmzdw-8knj9%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', ]
 
 
 # Application definition
@@ -81,8 +81,14 @@ WSGI_APPLICATION = 'djangographql.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'djangographql',
+        'USER': 'root',
+        'PASSWORD': os.environ.get('DB_PASSWORD', False),
+        'HOST': 'localhost',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
