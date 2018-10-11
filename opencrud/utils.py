@@ -66,7 +66,10 @@ def custom_filterset_factory(model, filterset_base_class=FilterSet, order_by=Non
 
     meta_dict = dict(Meta=meta_class)
 
-    if order_by:
+    if order_by is None:
+        order_by = tuple(field.name for field in model._meta.fields)
+
+    if order_by is not False:
         meta_dict.update({'order_by': OrderingFilter(fields=order_by)})
 
     filterset = type(

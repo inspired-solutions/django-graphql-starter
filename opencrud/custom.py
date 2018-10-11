@@ -16,7 +16,7 @@ class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
         *args,
         **kwargs
     ):
-        self._order_by = kwargs['order_by']
+        self._order_by = kwargs.get('order_by')
         kwargs.setdefault("skip", graphene.Int())
         super(CustomDjangoFilterConnectionField, self).__init__(*args, **kwargs)
 
