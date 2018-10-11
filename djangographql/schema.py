@@ -1,4 +1,6 @@
 import graphene
+from graphene import Node
+from graphene_django.debug import DjangoDebug
 
 from core.schema import Query as CoreQuery, Mutation as CoreMutation
 
@@ -9,7 +11,8 @@ class Query(
     """
     Query
     """
-    pass
+    node = Node.Field()
+    debug = graphene.Field(DjangoDebug, name='__debug')
 
 
 class Mutation(
