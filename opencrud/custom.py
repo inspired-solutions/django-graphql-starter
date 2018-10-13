@@ -7,10 +7,12 @@ from graphene.types.argument import to_arguments
 from graphene.relay import PageInfo
 
 from django.db.models.query import QuerySet
-from .utils import get_filterset_class, get_filtering_args_from_filterset, connection_from_list_slice
+from .utils import get_filterset_class, get_filtering_args_from_filterset, connection_from_list_slice, \
+    get_where_input_field
 
 
 class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
+    """ Custom DjangoFilterConnectionField following OpenCrud specs """
     def __init__(
         self,
         *args,
@@ -22,13 +24,18 @@ class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
 
     @property
     def args(self):
-        # if self._order_by
-        '''where = type(
-            str("%sWhereInput" % model._meta.object_name),
-            (graphene.InputObjectType, ),
-            {"Meta": meta_class},
-        )'''
-        return to_arguments(self._base_args or OrderedDict(), self.filtering_args)
+        filter_fields = dict(**self.filtering_args)
+        ordering_field = filter_fields['order_by']
+        del filter_fields['order_by']
+
+        where = get_where_input_field(filter_fields, self.model)
+
+        extra_args = {
+            'where': where,
+            'order_by': ordering_field,
+        }
+
+        return to_arguments(self._base_args or OrderedDict(), extra_args)
 
     @args.setter
     def args(self, args):
@@ -50,7 +57,8 @@ class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
 
     @property
     def filtering_args(self):
-        return get_filtering_args_from_filterset(self.filterset_class, self.node_type)
+        args = get_filtering_args_from_filterset(self.filterset_class, self.node_type)
+        return args
 
     @classmethod
     def resolve_connection(cls, connection, default_manager, args, iterable):
@@ -92,7 +100,9 @@ class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
         info,
         **args
     ):
-        filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
+        items = dict(**args, **dict(args['where']))
+
+        filter_kwargs = {k: v for k, v in items.items() if k in filtering_args}
         qs = filterset_class(
             data=filter_kwargs,
             queryset=default_manager.get_queryset(),
