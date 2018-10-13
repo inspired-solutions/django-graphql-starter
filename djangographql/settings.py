@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'graphene_django',
     'corsheaders',
-    'core'
+    'core',
 ]
 
 MIDDLEWARE = [
