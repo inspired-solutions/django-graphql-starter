@@ -12,6 +12,7 @@ from .utils import get_filterset_class, get_filtering_args_from_filterset, conne
 
 
 class WithCustomConnection(object):
+    """ Wrapper for DjangoObjectTypeOptions object. Adds model and connection_class """
     def __init__(self, model):
         self._model = model
 
@@ -34,16 +35,18 @@ class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
 
     @property
     def args(self):
+        """ Adds order_by and where fields """
         filter_fields = dict(**self.filtering_args)
-        ordering_field = filter_fields['order_by']
-        del filter_fields['order_by']
+        ordering_field = filter_fields.pop('order_by', False)
 
         where = get_where_input_field(filter_fields, self.model)
 
         extra_args = {
             'where': where,
-            'order_by': ordering_field,
         }
+
+        if ordering_field:
+            extra_args.update({'order_by': ordering_field})
 
         return to_arguments(self._base_args or OrderedDict(), extra_args)
 
@@ -53,6 +56,7 @@ class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
 
     @property
     def filterset_class(self):
+        """ Adds order_by to filterset_class meta """
         if not self._filterset_class:
             fields = self._fields or self.node_type._meta.filter_fields
             meta = dict(model=self.model, fields=fields, order_by=self._order_by)
@@ -67,10 +71,12 @@ class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
 
     @property
     def filtering_args(self):
+        """ Calls custom get_filtering_args_from_filterset with support for orderBy field """
         return get_filtering_args_from_filterset(self.filterset_class, self.node_type)
 
     @classmethod
     def resolve_connection(cls, connection, default_manager, args, iterable):
+        """ Calls custom connection_from_list_slice with support for skip field """
         if iterable is None:
             iterable = default_manager
         iterable = maybe_queryset(iterable)
@@ -109,6 +115,7 @@ class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
         info,
         **args
     ):
+        """ Uses where field for filter_kwargs """
         where_args = args.get('where') or dict()
         items = dict(**args, **where_args)
 

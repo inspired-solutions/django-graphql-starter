@@ -141,8 +141,8 @@ def custom_filterset_factory(model, filterset_base_class=FilterSet, order_by=Non
 
     meta_dict = dict(Meta=meta_class)
 
-    assert order_by is None, \
-        'Use or order_by field is disallowed at the moment'
+    assert order_by in [None, False], \
+        'order_by field can only be None or False'
 
     if order_by is None:
         order_by = tuple(field.name for field in model._meta.fields)
