@@ -8,7 +8,17 @@ from graphene.relay import PageInfo
 
 from django.db.models.query import QuerySet
 from .utils import get_filterset_class, get_filtering_args_from_filterset, connection_from_list_slice, \
-    get_where_input_field
+    get_where_input_field, get_connection_class
+
+
+class WithCustomConnection(object):
+    def __init__(self, model):
+        self._model = model
+
+    def __call__(self, cls):
+        cls.model = self._model
+        cls.connection_class = get_connection_class(self._model)
+        return cls
 
 
 class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
@@ -57,8 +67,7 @@ class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
 
     @property
     def filtering_args(self):
-        args = get_filtering_args_from_filterset(self.filterset_class, self.node_type)
-        return args
+        return get_filtering_args_from_filterset(self.filterset_class, self.node_type)
 
     @classmethod
     def resolve_connection(cls, connection, default_manager, args, iterable):
@@ -100,7 +109,8 @@ class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
         info,
         **args
     ):
-        items = dict(**args, **dict(args['where']))
+        where_args = args.get('where') or dict()
+        items = dict(**args, **where_args)
 
         filter_kwargs = {k: v for k, v in items.items() if k in filtering_args}
         qs = filterset_class(
