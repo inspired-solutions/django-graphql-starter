@@ -2,14 +2,83 @@ import six
 import graphene
 
 from graphene_django.filter.filterset import setup_filterset, GrapheneFilterSetMixin
+from graphene_django.registry import get_global_registry
 from graphql_relay.connection.connectiontypes import Connection, PageInfo, Edge
 from graphql_relay.connection.arrayconnection import get_offset_with_default, offset_to_cursor
+from graphene.types.argument import to_arguments
 
 from django_filters import FilterSet, OrderingFilter
 
 
+def _get_aggregate_class(name, registry):
+    """ Get the aggregate class as a subclass of ObjectType """
+    classname = str("Aggregate%s" % name)
+
+    aggregate_class = registry._registry.get(classname)
+    if not aggregate_class:
+        aggregate_class = type(
+            classname,
+            (graphene.ObjectType,),
+            {'count': graphene.Int()}
+        )
+
+        registry._registry[classname] = aggregate_class
+
+    return aggregate_class
+
+
+def get_connection_class(model):
+    """ Get the connection class as a subclass of Connection """
+    registry = get_global_registry()
+    name = model._meta.object_name
+
+    aggregate_class = _get_aggregate_class(name, registry)
+
+    def resolve_aggregate(self, info):
+        return aggregate_class(count=self.length)
+
+    classname = str("%sConnection" % name)
+
+    connection_class = registry._registry.get(classname)
+    if not connection_class:
+        connection_class = type(
+            classname,
+            (graphene.Connection, ),
+            {
+                'aggregate': graphene.Field(aggregate_class),
+                'resolve_aggregate': resolve_aggregate,
+                'Meta': {'abstract': True},
+            }
+        )
+
+        registry._registry[classname] = connection_class
+
+    return connection_class
+
+
+def get_where_input_field(filter_fields, model):
+    """ Get the where input field as a subclass of InputObjectType """
+    registry = get_global_registry()
+
+    classname = str("%sWhereInput" % model._meta.object_name)
+
+    where_class = registry._registry.get(classname)
+    if not where_class:
+        where_class = type(
+            classname,
+            (graphene.InputObjectType, ),
+            to_arguments(filter_fields),
+        )
+
+        registry._registry[classname] = where_class
+
+    return where_class()
+
+
 def get_ordering_field(filter_field, model):
     """ Get the ordering fields as Enum """
+    registry = get_global_registry()
+
     args = {}
     for choice in filter_field.field.choices.choices:
         field_name, label = choice
@@ -19,11 +88,17 @@ def get_ordering_field(filter_field, model):
 
         args[name] = field_name
 
-    order_class = type(
-        str("%sOrderByInput" % model._meta.object_name),
-        (graphene.Enum, ),
-        args
-    )
+    classname = str("%sOrderByInput" % model._meta.object_name)
+
+    order_class = registry._registry.get(classname)
+    if not order_class:
+        order_class = type(
+            classname,
+            (graphene.Enum, ),
+            args
+        )
+
+        registry._registry[classname] = order_class
 
     return order_class()
 
@@ -66,10 +141,13 @@ def custom_filterset_factory(model, filterset_base_class=FilterSet, order_by=Non
 
     meta_dict = dict(Meta=meta_class)
 
+    assert order_by is None, \
+        'Use or order_by field is disallowed at the moment'
+
     if order_by is None:
         order_by = tuple(field.name for field in model._meta.fields)
 
-    if order_by is not False:
+    if order_by:
         meta_dict.update({'order_by': OrderingFilter(fields=order_by)})
 
     filterset = type(
@@ -101,7 +179,7 @@ def connection_from_list_slice(list_slice, args=None, connection_type=None,
     after = args.get('after')
     first = args.get('first')
     last = args.get('last')
-    skip = args.get('skip')
+    skip = args.get('skip', 0)
     if list_slice_length is None:
         list_slice_length = len(list_slice)
     slice_end = slice_start + list_slice_length
