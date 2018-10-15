@@ -1,14 +1,16 @@
 import graphene
 
+from functools import partial
 from collections import OrderedDict
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.utils import maybe_queryset
 from graphene.types.argument import to_arguments
 from graphene.relay import PageInfo
+from graphene.relay.node import from_global_id
 
 from django.db.models.query import QuerySet
 from .utils import get_filterset_class, get_filtering_args_from_filterset, connection_from_list_slice, \
-    get_where_input_field, get_connection_class
+    get_where_input_field, get_where_unique_input_field, get_connection_class
 
 
 class WithCustomConnection(object):
@@ -139,9 +141,10 @@ class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
 
 
 class CustomDjangoFilterListField(CustomDjangoFilterConnectionField):
+    """ Custom List following OpenCrud specs """
     @property
     def type(self):
-        """ Custom List following OpenCrud specs """
+        """ returns List of given node type """
         from graphene_django.types import DjangoObjectType
         from graphene.relay.connection import ConnectionField
 
@@ -184,3 +187,54 @@ class CustomDjangoFilterListField(CustomDjangoFilterConnectionField):
         )
 
         return connection
+
+
+class CustomDjangoField(graphene.Field):
+    """ Custom Django Field following OpenCrud specs """
+    def __init__(self, type, *args, **kwargs):
+        super(CustomDjangoField, self).__init__(type, *args, **kwargs)
+
+    @property
+    def args(self):
+        """ Adds where field """
+        where = get_where_unique_input_field(self._type._meta.model)
+
+        extra_args = {
+            'where': where,
+        }
+
+        return to_arguments(self._base_args or OrderedDict(), extra_args)
+
+    @args.setter
+    def args(self, args):
+        self._base_args = args
+
+    @classmethod
+    def resolve_connection(cls, type, args, model_object):
+        name, id = from_global_id(args['where']['id'])
+
+        if model_object is None:
+            model_object = type._meta.model._default_manager.get(id=id)
+
+        return model_object
+
+    @classmethod
+    def connection_resolver(
+            cls,
+            resolver,
+            type,
+            root,
+            info,
+            **args
+    ):
+        model_object = resolver(root, info, **args)
+        on_resolve = partial(cls.resolve_connection, type, args)
+
+        return on_resolve(model_object)
+
+    def get_resolver(self, parent_resolver):
+        return partial(
+            self.connection_resolver,
+            parent_resolver,
+            self.type,
+        )

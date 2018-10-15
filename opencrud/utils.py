@@ -56,6 +56,25 @@ def get_connection_class(model):
     return connection_class
 
 
+def get_where_unique_input_field(model):
+    """ Get the where input field as a subclass of InputObjectType """
+    registry = get_global_registry()
+
+    classname = str("%sWhereUniqueInput" % model._meta.object_name)
+
+    where_class = registry._registry.get(classname)
+    if not where_class:
+        where_class = type(
+            classname,
+            (graphene.InputObjectType, ),
+            {'id': graphene.ID(required=True)},
+        )
+
+        registry._registry[classname] = where_class
+
+    return graphene.NonNull(where_class)
+
+
 def get_where_input_field(filter_fields, model):
     """ Get the where input field as a subclass of InputObjectType """
     registry = get_global_registry()
