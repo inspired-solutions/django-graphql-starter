@@ -211,6 +211,7 @@ class CustomDjangoField(graphene.Field):
 
     @classmethod
     def resolve_connection(cls, type, args, model_object):
+        """ Uses parent_resolver, or resolves from global_id """
         name, id = from_global_id(args['where']['id'])
 
         if model_object is None:
@@ -227,12 +228,14 @@ class CustomDjangoField(graphene.Field):
             info,
             **args
     ):
+        """ Calls cls.resolve_connection """
         model_object = resolver(root, info, **args)
         on_resolve = partial(cls.resolve_connection, type, args)
 
         return on_resolve(model_object)
 
     def get_resolver(self, parent_resolver):
+        """ Calls self.connection_resolver """
         return partial(
             self.connection_resolver,
             parent_resolver,
