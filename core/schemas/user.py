@@ -4,8 +4,10 @@ from graphene_django.types import DjangoObjectType
 from django.contrib.auth import models as auth_models
 from graphene import Node
 
-from opencrud.custom import WithCustomConnection, CustomDjangoFilterConnectionField, CustomDjangoFilterListField, \
-    CustomDjangoField
+from opencrud.connection import WithOpenCrudConnection
+from opencrud.filter import OpenCrudDjangoFilterConnectionField
+from opencrud.list import OpenCrudDjangoFilterListField
+from opencrud.field import OpenCrudDjangoField
 
 
 class UserWhereUniqueInput(graphene.InputObjectType):
@@ -13,13 +15,13 @@ class UserWhereUniqueInput(graphene.InputObjectType):
 
 
 class User(DjangoObjectType):
-    @WithCustomConnection(auth_models.User)
+    @WithOpenCrudConnection(auth_models.User)
     class Meta:
         filter_fields = ('id', 'email', )
         interfaces = (Node, )
 
 
 class Query(graphene.ObjectType):
-    user = CustomDjangoField(User)
-    users = CustomDjangoFilterListField(User)
-    users_connection = CustomDjangoFilterConnectionField(User)
+    user = OpenCrudDjangoField(User)
+    users = OpenCrudDjangoFilterListField(User)
+    users_connection = OpenCrudDjangoFilterConnectionField(User)
