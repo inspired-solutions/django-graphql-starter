@@ -7,6 +7,7 @@ from graphene_django.utils import maybe_queryset
 from graphene.types.argument import to_arguments
 from graphene.relay import PageInfo
 from graphene.relay.node import from_global_id
+from graphql.error import GraphQLError
 
 from django.db.models.query import QuerySet
 from .utils import get_filterset_class, get_filtering_args_from_filterset, connection_from_list_slice, \
@@ -122,11 +123,22 @@ class CustomDjangoFilterConnectionField(DjangoFilterConnectionField):
         items = dict(**args, **where_args)
 
         filter_kwargs = {k: v for k, v in items.items() if k in filtering_args}
-        qs = filterset_class(
+
+        filterset = filterset_class(
             data=filter_kwargs,
             queryset=default_manager.get_queryset(),
             request=info.context,
-        ).qs
+        )
+
+        if not filterset.is_valid():
+            exc = {
+                key: [e.message for e in error_list]
+                for key, error_list in filterset.errors.as_data().items()
+            }
+
+            raise GraphQLError(exc)
+
+        qs = filterset.qs
 
         return super(DjangoFilterConnectionField, cls).connection_resolver(
             resolver,
