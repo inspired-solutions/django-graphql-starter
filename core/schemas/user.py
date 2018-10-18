@@ -5,13 +5,9 @@ from django.contrib.auth import models as auth_models
 from graphene import Node
 
 from opencrud.connection import WithOpenCrudConnection
-from opencrud.filter import OpenCrudDjangoFilterConnectionField
 from opencrud.list import OpenCrudDjangoFilterListField
+from opencrud.filter import OpenCrudDjangoFilterConnectionField
 from opencrud.field import OpenCrudDjangoField
-
-
-class UserWhereUniqueInput(graphene.InputObjectType):
-    id = graphene.ID()
 
 
 class User(DjangoObjectType):
