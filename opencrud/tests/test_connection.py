@@ -27,8 +27,8 @@ def test_with_open_crud_connection():
 def test_get_connection_class():
     aggregate = User._meta.connection.aggregate
 
-    assert aggregate._type._meta.name == 'AggregateUser', ""
-    assert isinstance(aggregate._type.count, graphene.Int), ""
+    assert aggregate._type._meta.name == 'AggregateUser'
+    assert isinstance(aggregate._type.count, graphene.Int)
 
 
 @pytest.mark.django_db
