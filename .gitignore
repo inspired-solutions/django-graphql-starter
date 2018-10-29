@@ -12,7 +12,6 @@ venv/
 **/.tern-port
 .vscode
 
-local_settings.py
-
 db.sqlite3
+
 djangographql/djangographql/settings/local.py

@@ -12,4 +12,4 @@ ALLOWED_HOSTS = ['*']
 
 # MIDDLEWARE.append('sample.middleware')
 
-# DATABASES['OPTIONS'].update{ 'unix_socket': '/Applications/MAMP/tmp/mysql/mysql.sock'}
+# DATABASES['OPTIONS'].update{ 'unix_socket': '/tmp/mysql/mysql.sock'}
