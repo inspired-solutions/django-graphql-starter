@@ -1,6 +1,6 @@
 <h1 align="center"><strong>Django with GraphQL Server</strong></h1>
 
-<center>![Django with GraphQL Server](https://cdn-images-1.medium.com/max/1600/1*jLrvxW83rre-25Nrhk-tww.png)</center>
+![](https://cdn-images-1.medium.com/max/1600/1*jLrvxW83rre-25Nrhk-tww.png)
 
 ## Features
 
