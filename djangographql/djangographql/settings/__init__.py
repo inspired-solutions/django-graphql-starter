@@ -1,0 +1,1 @@
+"""djangographql application."""

@@ -82,16 +82,15 @@ WSGI_APPLICATION = 'djangographql.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'djangographql',
-        'USER': 'root',
-        'PASSWORD': os.environ.get('DB_PASSWORD', False),
-        'HOST': 'localhost',
+        'NAME': os.environ.get('DB_NAME', 'djangographql'),
+        'USER': os.environ.get('DB_USER', 'root'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'root'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -161,7 +160,3 @@ CORS_ORIGIN_WHITELIST = (
     '127.0.0.1:4000',
 )
 
-try:
-    from djangographql.local_settings import *
-except ImportError:
-    pass
