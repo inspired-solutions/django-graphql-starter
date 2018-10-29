@@ -96,6 +96,9 @@ $ ./manage.py migrate
 $ ./manage.py collectstatic
 ```
 
+## References
+- [https://www.djangoproject.com/](https://github.com/django/django)
+
 ## Contributing
 
 The django-graphql-starter are maintained by the Inspired Solutions.
