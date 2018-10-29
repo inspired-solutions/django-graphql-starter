@@ -13,3 +13,5 @@ ALLOWED_HOSTS = ['*']
 # MIDDLEWARE.append('sample.middleware')
 
 # DATABASES['OPTIONS'].update{ 'unix_socket': '/tmp/mysql/mysql.sock'}
+
+# FIXTURES_PATH = os.path.join(os.path.dirname(BASE_DIR + '../path_to_fixtures/'), 'fixtures.json')
