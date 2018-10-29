@@ -89,11 +89,14 @@ pip3 install -r requirements.txt
 
 ## Deployment
 
-```
-$ cp djangographql/local_settings.prod.py djangographql/local_settings.py
-$ nano djangographql/local_settings.py  # update settings
-$ ./manage.py migrate
-$ ./manage.py collectstatic
+```sh
+cp djangographql/local_settings.prod.py djangographql/local_settings.py
+
+nano djangographql/local_settings.py  # update settings
+
+./manage.py migrate
+
+./manage.py collectstatic
 ```
 
 ## References
