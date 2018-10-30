@@ -15,3 +15,8 @@ venv/
 local_settings.py
 
 db.sqlite3
+
+.pytest_cache/
+__pycache__/
+htmlcov/
+.coverage

@@ -1,0 +1,8 @@
+[report]
+omit =
+    .idea/*
+    */migrations/*
+    config/*
+    apps/*/tests/*
+
+show_missing = True

@@ -44,6 +44,10 @@ pip3 install -r requirements.txt
 ./manage.py runserver
 ```
 
+## Tests
+
+- `py.test opencrud -s --cov=opencrud && coverage html`
+
 ## Documentation
 
 ### Commands
