@@ -1,7 +1,7 @@
 import graphene
 
 from core.schemas.group import Query as GroupQuery, Mutation as GroupMutation
-from core.schemas.user import Query as UserQuery
+from core.schemas.user import Query as UserQuery, Mutation as UserMutation
 from core.schemas.auth import Mutation as AuthMutation
 
 
@@ -14,6 +14,7 @@ class Query(
 
 class Mutation(
         GroupMutation,
+        UserMutation,
         AuthMutation,
         graphene.ObjectType):
     pass
