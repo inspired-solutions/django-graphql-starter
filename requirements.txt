@@ -5,6 +5,7 @@ django-filter>=2
 djangorestframework
 graphene
 graphene-django
+graphene-django-opencrud
 mysqlclient==1.3.12
 pytest
 pytest-cov
